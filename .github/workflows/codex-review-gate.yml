@@ -99,17 +99,28 @@ jobs:
             }
 
             const latestCodexResponseAt = codexResponses[codexResponses.length - 1].at;
-            const commits = await github.paginate(github.rest.pulls.listCommits, {
-              owner,
-              repo,
-              pull_number: prNumber,
-              per_page: 100,
-            });
-            const latestCommitAt = commits.reduce((latest, commit) => {
-              const commitAt = parseDate(commit.commit?.committer?.date ?? commit.commit?.author?.date);
-              return commitAt.getTime() > latest.getTime() ? commitAt : latest;
-            }, parseDate(pull.created_at));
-            if (latestCodexResponseAt.getTime() < latestCommitAt.getTime()) {
+            let headCommitAt = parseDate(pull.created_at);
+            if (pull.head?.sha) {
+              const headCommit = await github.rest.repos.getCommit({
+                owner,
+                repo,
+                ref: pull.head.sha,
+              });
+              headCommitAt = parseDate(headCommit.data.commit?.committer?.date ?? headCommit.data.commit?.author?.date);
+            } else {
+              core.warning(`Unable to determine PR head SHA for PR #${prNumber}; falling back to latest commit timestamp in PR history.`);
+              const commits = await github.paginate(github.rest.pulls.listCommits, {
+                owner,
+                repo,
+                pull_number: prNumber,
+                per_page: 100,
+              });
+              headCommitAt = commits.reduce((latest, commit) => {
+                const commitAt = parseDate(commit.commit?.committer?.date ?? commit.commit?.author?.date);
+                return commitAt.getTime() > latest.getTime() ? commitAt : latest;
+              }, parseDate(pull.created_at));
+            }
+            if (latestCodexResponseAt.getTime() < headCommitAt.getTime()) {
               core.setFailed('Latest codex response is older than the PR head commit.');
               return;
             }
