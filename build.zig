@@ -1,6 +1,18 @@
 const std = @import("std");
 
+fn requireSubmodule(b: *std.Build, path: []const u8) void {
+    const absolute_path = b.pathFromRoot(path);
+    std.fs.accessAbsolute(absolute_path, .{}) catch {
+        std.process.fatal(
+            "missing required first-party dependency at '{s}'. Run `git submodule update --init --recursive` from the ZiggyRunOrchestrator repo root.",
+            .{path},
+        );
+    };
+}
+
 pub fn build(b: *std.Build) void {
+    requireSubmodule(b, "deps/ziggy-memory-store/build.zig.zon");
+
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
 
