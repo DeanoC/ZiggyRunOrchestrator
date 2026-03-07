@@ -1,0 +1,3 @@
+[submodule "deps/ziggy-memory-store"]
+	path = deps/ziggy-memory-store
+	url = https://github.com/DeanoC/ZiggyMemoryStore.git

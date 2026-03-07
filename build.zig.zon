@@ -5,13 +5,14 @@
     .minimum_zig_version = "0.13.0",
     .dependencies = .{
         .ziggy_memory_store = .{
-            .url = "https://github.com/DeanoC/ZiggyMemoryStore/archive/refs/tags/v0.1.0.tar.gz",
-            .hash = "ziggy_memory_store-0.1.0-QlN-_5uGAQAT0z2xGi3yBmg3YOPYt288yaKoEjSBM_EU",
+            .path = "deps/ziggy-memory-store",
         },
     },
     .paths = .{
         "build.zig",
         "build.zig.zon",
+        ".gitmodules",
+        "deps",
         "src",
         "README.md",
         "LICENSE",
